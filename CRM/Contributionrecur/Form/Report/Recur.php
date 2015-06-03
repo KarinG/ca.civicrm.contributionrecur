@@ -141,6 +141,15 @@ class CRM_Contributionrecur_Form_Report_Recur extends CRM_Report_Form {
           ),
         ),
       ),
+      'civicrm_iats_customer_codes' =>
+        array(
+          'dao' => 'CRM_Contribute_DAO_Contribution',
+          'fields' =>
+            array(
+              'customer_code' => array('title' => 'customer code', 'default' => TRUE),
+              'expiry' => array('title' => 'expiry', 'default' => TRUE),
+            ),
+        ),
       'civicrm_contribution_recur' => array(
         'dao' => 'CRM_Contribute_DAO_ContributionRecur',
         'order_bys' => array(
@@ -148,7 +157,7 @@ class CRM_Contributionrecur_Form_Report_Recur extends CRM_Report_Form {
             'title' => ts("Series ID"),
           ),
           'amount' => array(
-            'title' => ts("Amount"),
+            'title' => ts("Current Amount"),
           ),
           'start_date' => array(
             'title' => ts('Start Date'),
@@ -235,6 +244,7 @@ class CRM_Contributionrecur_Form_Report_Recur extends CRM_Report_Form {
           ),
           'payment_processor_id' => array(
             'title' => ts('Payment Processor'),
+            'default' => TRUE,
           ),
         ),
         'filters' => array(
@@ -364,9 +374,12 @@ class CRM_Contributionrecur_Form_Report_Recur extends CRM_Report_Form {
         ON ({$this->_aliases['civicrm_contact']}.id = {$this->_aliases['civicrm_address']}.contact_id AND
           {$this->_aliases['civicrm_address']}.is_primary = 1 )";
     $this->_from .= "
-      LEFT  JOIN civicrm_phone {$this->_aliases['civicrm_phone']}
+      LEFT JOIN civicrm_phone {$this->_aliases['civicrm_phone']}
         ON ({$this->_aliases['civicrm_contact']}.id = {$this->_aliases['civicrm_phone']}.contact_id AND
           {$this->_aliases['civicrm_phone']}.is_primary = 1)";
+    $this->_from .= "
+      LEFT JOIN civicrm_iats_customer_codes {$this->_aliases['civicrm_iats_customer_codes']}
+        ON ({$this->_aliases['civicrm_iats_customer_codes']}.recur_id = {$this->_aliases['civicrm_contribution_recur']}.id)";
   }
 
   function groupBy() {
@@ -386,6 +399,22 @@ class CRM_Contributionrecur_Form_Report_Recur extends CRM_Report_Form {
         );
         $rows[$rowNum]['civicrm_contact_sort_name_link'] = $url;
         $rows[$rowNum]['civicrm_contact_sort_name_hover'] = ts('View Contact Summary for this Contact.');
+      }
+
+      // Link to recurring series
+      // e.g. http://lllc.local/civicrm/contact/view/contributionrecur?reset=1&id=13&cid=7481&context=contribution
+      if (($value = CRM_Utils_Array::value('civicrm_contribution_recur_id', $row)) &&
+        CRM_Core_Permission::check('access CiviContribute')
+      ) {
+        $url = CRM_Utils_System::url("civicrm/contact/view/contributionrecur",
+          "reset=1&id=" . $row['civicrm_contribution_recur_id'] .
+          "&cid=" . $row['civicrm_contact_id'] .
+          "&action=view&context=contribution&selectedChild=contribute",
+          $this->_absoluteUrl
+        );
+        $rows[$rowNum]['civicrm_contribution_recur_id_link'] = $url;
+        $rows[$rowNum]['civicrm_contribution_recur_id_hover'] = ts("View Details of this Recurring Series.");
+        $entryFound = TRUE;
       }
 
       // handle contribution status id
