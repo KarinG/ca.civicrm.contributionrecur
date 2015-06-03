@@ -168,8 +168,9 @@ class CRM_Contributionrecur_Form_Report_Recur extends CRM_Report_Form {
         ),
         'fields' => array(
           'id' => array(
-            'no_display' => TRUE,
+            //'no_display' => TRUE,
             'required' => TRUE,
+            'title' => ts("Series ID"),
           ),
           'recur_id' => array(
             'name' => 'id',
