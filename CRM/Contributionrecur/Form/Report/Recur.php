@@ -120,11 +120,14 @@ class CRM_Contributionrecur_Form_Report_Recur extends CRM_Report_Form {
         'dao' => 'CRM_Contribute_DAO_Contribution',
         'fields' => array(
           'id' => array(
-            'no_display' => TRUE,
+            //'no_display' => TRUE,
+            'title' => ts('Contribution ID(s)'),
             'required' => TRUE,
+            'dbAlias' => "GROUP_CONCAT(contribution_civireport.id SEPARATOR ', ')",
           ),
           'total_amount' => array(
             'title' => ts('Amount Contributed to date'),
+            'required' => TRUE,
             'statistics' => array(
               'sum' => ts("Total Amount contributed")
             ),
