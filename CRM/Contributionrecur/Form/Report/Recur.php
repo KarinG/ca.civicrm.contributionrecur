@@ -56,7 +56,7 @@ class CRM_Contributionrecur_Form_Report_Recur extends CRM_Report_Form {
       self::$prefixes =  CRM_Contact_BAO_Contact::buildOptions('individual_prefix_id');
       self::$contributionStatus = CRM_Contribute_BAO_Contribution::buildOptions('contribution_status_id');
     }
-      
+
     $params = array('version' => 3, 'sequential' => 1, 'is_test' => 0, 'return.name' => 1);
     $result = civicrm_api('PaymentProcessor', 'get', $params);
     foreach($result['values'] as $pp) {
@@ -200,6 +200,7 @@ class CRM_Contributionrecur_Form_Report_Recur extends CRM_Report_Form {
           ),
           'start_date' => array(
             'title' => ts('Start Date'),
+            'default' => TRUE,
           ),
           'create_date' => array(
             'title' => ts('Create Date'),
@@ -212,6 +213,7 @@ class CRM_Contributionrecur_Form_Report_Recur extends CRM_Report_Form {
           ),
           self::$nscd_fid => array(
             'title' => ts('Next Scheduled Contribution Date'),
+            'default' => TRUE,
           ),
           'next_scheduled_day'  => array(
             'name' => self::$nscd_fid,
@@ -351,7 +353,8 @@ class CRM_Contributionrecur_Form_Report_Recur extends CRM_Report_Form {
         ON ({$this->_aliases['civicrm_contribution_recur']}.id = {$this->_aliases['civicrm_contribution']}.contribution_recur_id AND 1 = {$this->_aliases['civicrm_contribution']}.contribution_status_id)";
     $this->_from .= "
       LEFT JOIN civicrm_email  {$this->_aliases['civicrm_email']}
-        ON {$this->_aliases['civicrm_contact']}.id = {$this->_aliases['civicrm_email']}.contact_id";
+        ON ({$this->_aliases['civicrm_contact']}.id = {$this->_aliases['civicrm_email']}.contact_id AND
+          {$this->_aliases['civicrm_email']}.is_primary = 1 )";
     $this->_from .= "
       LEFT JOIN civicrm_address {$this->_aliases['civicrm_address']}
         ON ({$this->_aliases['civicrm_contact']}.id = {$this->_aliases['civicrm_address']}.contact_id AND
@@ -359,7 +362,7 @@ class CRM_Contributionrecur_Form_Report_Recur extends CRM_Report_Form {
     $this->_from .= "
       LEFT  JOIN civicrm_phone {$this->_aliases['civicrm_phone']}
         ON ({$this->_aliases['civicrm_contact']}.id = {$this->_aliases['civicrm_phone']}.contact_id AND
-       {$this->_aliases['civicrm_phone']}.is_primary = 1)";
+          {$this->_aliases['civicrm_phone']}.is_primary = 1)";
   }
 
   function groupBy() {
