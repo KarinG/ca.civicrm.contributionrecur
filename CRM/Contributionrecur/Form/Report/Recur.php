@@ -144,10 +144,15 @@ class CRM_Contributionrecur_Form_Report_Recur extends CRM_Report_Form {
       'civicrm_iats_customer_codes' =>
         array(
           'dao' => 'CRM_Contribute_DAO_Contribution',
+          'order_bys' => array(
+            'expiry' => array(
+              'title' => ts("Expiry Date"),
+            ),
+          ),
           'fields' =>
             array(
               'customer_code' => array('title' => 'customer code', 'default' => TRUE),
-              'expiry' => array('title' => 'expiry', 'default' => TRUE),
+              'expiry' => array('title' => 'Expiry Date', 'default' => TRUE),
             ),
         ),
       'civicrm_contribution_recur' => array(
@@ -415,6 +420,16 @@ class CRM_Contributionrecur_Form_Report_Recur extends CRM_Report_Form {
         $rows[$rowNum]['civicrm_contribution_recur_id_link'] = $url;
         $rows[$rowNum]['civicrm_contribution_recur_id_hover'] = ts("View Details of this Recurring Series.");
         $entryFound = TRUE;
+      }
+
+      // handle expiry date
+      if ($value = CRM_Utils_Array::value('civicrm_iats_customer_codes_expiry', $row)) {
+        if ($rows[$rowNum]['civicrm_iats_customer_codes_expiry'] == '0000') {
+          $rows[$rowNum]['civicrm_iats_customer_codes_expiry'] = ' ';
+        }
+        elseif ($rows[$rowNum]['civicrm_iats_customer_codes_expiry'] != '0000') {
+          $rows[$rowNum]['civicrm_iats_customer_codes_expiry'] = '20' . substr($rows[$rowNum]['civicrm_iats_customer_codes_expiry'], 0, 2) . '/' . substr($rows[$rowNum]['civicrm_iats_customer_codes_expiry'], 2, 2);
+        }
       }
 
       // handle contribution status id
